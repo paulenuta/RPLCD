@@ -20,7 +20,7 @@ boards usually have a "backpack board" and look similar to this:
     :alt: LCD with I²C port expander
 
 The board on this photo has a PCF8574 port expander chip on it. There are also
-boards with other chips, e.g. the Adafruit I2C/SPI LCD Backpack which uses an
+boards with other chips, e.g. the Adafruit I²C/SPI LCD Backpack which uses an
 MCP23008 port expander.
 
 First, connect the pins on the right with the Raspberry Pi:
@@ -42,8 +42,8 @@ Via GPIO
 If you don't have an I²C version of the board, you can also connect the LCD
 Pins directly to the GPIO header of the Raspberry Pi.
 
-The standard wiring configuration uses the following pins in 4 bit mode (BOARD
-numbering scheme):
+If you don't know how to wire up the LCD to the Raspberry Pi, you could use this
+example wiring configuration in 4 bit mode (BOARD numbering scheme):
 
 - RS: 15
 - RW: 18
@@ -62,6 +62,20 @@ the `Adafruit tutorial
 <https://learn.adafruit.com/character-lcds/wiring-a-character-lcd>`_ to learn
 how to wire up these circuits.
 
+Via pigpio
+~~~~~~~~~~
+
+If you decide to use the ``pigpio`` library to control the LCD, follow the
+instructions set out above. Please keep in mind that the ``pigpio`` can only
+use the BCM numbering scheme.
+
+The advantage of using the ``pigpio`` library is that you could control the
+backlight and contrast via PWM. You could also run the program on one computer
+(there is no need for this computer to be a Raspberry Pi) and control a LCD on
+any Raspberry Pi because ``pigpio`` follows a server-client approach. The
+disadvantage is, that it might be a bit slower when updating compared to using
+the GPIO library.
+
 
 Initializing the LCD
 ====================
@@ -77,10 +91,11 @@ First, import the RPLCD library from your Python script.
 
 Then create a new instance of the :class:`~RPLCD.i2c.CharLCD` class. For that,
 you need to know the address of your LCD. You can find it on the command line
-using the ``sudo i2cdetect 1`` command. In my case the address of the display
-was ``0x27``. You also need to provide the name of the I²C port expander that
-your board uses. It should be written on the microchip that's soldered on to
-your board. Supported port expanders are the ``PCF8574`` and the ``MCP23008``.
+using the ``sudo i2cdetect 1`` command (or ``sudo i2cdetect 0`` on the original
+Raspberry Pi). In my case the address of the display was ``0x27``. You also need
+to provide the name of the I²C port expander that your board uses. It should be
+written on the microchip that's soldered on to your board. Supported port
+expanders are the ``PCF8574``, the ``MCP23008`` and the ``MCP23017``.
 
 .. sourcecode:: python
 
@@ -107,17 +122,18 @@ First, import the RPLCD library from your Python script.
 
     from RPLCD.gpio import CharLCD
 
-Then create a new instance of the :class:`~RPLCD.gpio.CharLCD` class. If you used
-the default wiring above and have a 20x4 LCD, all that you need is the
-following:
+Then create a new instance of the :class:`~RPLCD.gpio.CharLCD` class. If you
+have a 20x4 LCD, you must at least specify the numbering mode and the pins you
+used:
 
 .. sourcecode:: python
 
-    lcd = CharLCD()
+    lcd = CharLCD(pin_rs=15, pin_rw=18, pin_e=16, pins_data=[21, 22, 23, 24],
+                  numbering_mode=GPIO.BOARD)
 
 If you want to customize the way the LCD is instantiated (e.g. by changing the
 pin configuration or the number of columns and rows on your display), you can
-change the corresponding parameters. Example:
+change the corresponding parameters. Here's a full example:
 
 .. sourcecode:: python
 
@@ -125,6 +141,47 @@ change the corresponding parameters. Example:
 
     lcd = CharLCD(pin_rs=15, pin_rw=18, pin_e=16, pins_data=[21, 22, 23, 24],
                   numbering_mode=GPIO.BOARD,
+                  cols=20, rows=4, dotsize=8,
+                  charmap='A02',
+                  auto_linebreaks=True)
+
+Setup: pigpio
+~~~~~~~~~~~~~
+
+First, import the the pigpio and RPLCD libraries from your Python script.
+
+.. sourcecode:: python
+
+    import pigpio
+    from RPLCD.pigpio import CharLCD
+
+Then create a connection to the pigpio daemon
+
+.. sourcecode:: python
+
+    pi = pigpio.pi()
+
+and create a new instance of the :class:`~RPLCD.pigpio.CharLCD` class. If you
+have a 20x4 LCD, you must at least specify the previously initiated pigpio
+connection and the pins you used:
+
+.. sourcecode:: python
+
+    lcd = CharLCD(pi,
+                  pin_rs=15, pin_rw=18, pin_e=16, pins_data=[21, 22, 23, 24])
+
+If you want to customize the way the LCD is instantiated (e.g. by changing the
+pin configuration or the number of columns and rows on your display), you can
+change the corresponding parameters. Here's a full example:
+
+.. sourcecode:: python
+
+    import pigpio
+    from RPLCD.pigpio import CharLCD
+
+    pi = pigpio.pi()
+    lcd = CharLCD(pi,
+                  pin_rs=15, pin_rw=18, pin_e=16, pins_data=[21, 22, 23, 24],
                   cols=20, rows=4, dotsize=8,
                   charmap='A02',
                   auto_linebreaks=True)

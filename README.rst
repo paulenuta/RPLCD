@@ -24,14 +24,19 @@ RPLCD
     :alt: License
 
 A Python 3/2 Raspberry PI Character LCD library for the Hitachi HD44780
-controller. It supports both GPIO (parallel) mode as well as boards with an I2C
+controller. It supports both GPIO (parallel) mode as well as boards with an I²C
 port expander (e.g. the PCF8574 or the MCP23008).
 
 This library is inspired by Adafruit Industries' CharLCD_ library as well as by
 Arduino's LiquidCrystal_ library.
 
-No external dependencies (except the ``RPi.GPIO`` library, which comes
-preinstalled on Raspbian) are needed to use this library.
+For GPIO mode, no external dependencies (except the ``RPi.GPIO`` library, which
+comes preinstalled on Raspbian) are needed to use this library. If you want to
+control LCDs via I²C, then you also need the ``python-smbus`` library. If you
+want to control the LCD with ``pigpio``, you have to install the pigpio_ library.
+
+If you're trying to get started with RPLCD, you should probably `read the docs
+<#documentation>`__ :)
 
 .. image:: https://raw.github.com/dbrgn/RPLCD/master/photo-i2c.jpg
     :alt: Photo of 20x4 LCD in action
@@ -45,7 +50,7 @@ You can install RPLCD directly from `PyPI
 
     $ sudo pip install RPLCD
 
-If you want to use I2C, you also need smbus::
+If you want to use I²C, you also need smbus::
 
     $ sudo apt install python-smbus
 
@@ -80,21 +85,28 @@ motivation:
 
 - MicroPython port
 
+Supported I²C Port Expanders
+----------------------------
+
+- PCF8574 (used by a lot of I²C LCD adapters on Ali Express)
+- MCP23008 (used in Adafruit I²C LCD backpack)
+- MCP23017
+
 
 Documentation
 =============
 
-You can find the documentation here: https://readthedocs.org/projects/rplcd/
-
+- Stable (released on PyPI): http://rplcd.readthedocs.io/en/stable/
+- Latest (current master): http://rplcd.readthedocs.io/en/latest/
 
 Testing
 =======
 
-Test Scripts
-------------
+Interactive Test Script
+-----------------------
 
-To test your LCD, please run the ``test_16x2.py`` or ``test_20x4.py`` script and
-confirm/verify each step with the enter key.
+To test your LCD, please run the ``lcdtest.py`` script with the ``testsuite``
+target.
 
 Unit Tests
 ----------
@@ -132,10 +144,7 @@ This code is licensed under the MIT license, see the `LICENSE file
 <https://github.com/dbrgn/RPLCD/blob/master/LICENSE>`_ or `tldrlegal
 <http://www.tldrlegal.com/license/mit-license>`_ for more information. 
 
-The module ``RPLCD/enum.py`` is (c) 2004-2013 by Barry Warsaw. It was
-distributed as part of the ``flufl.enum`` package under the LGPL License version
-3 or later.
-
 
 .. _charlcd: https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code/tree/master/Adafruit_CharLCD
 .. _liquidcrystal: http://arduino.cc/en/Reference/LiquidCrystal
+.. _pigpio: http://abyz.me.uk/rpi/pigpio/

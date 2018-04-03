@@ -2,7 +2,7 @@ API
 ###
 
 CharLCD (I²C)
-==============
+=============
 
 The main class for controlling I²C connected LCDs.
 
@@ -15,33 +15,11 @@ The main class for controlling GPIO (parallel) connected LCDs.
 
 .. autoclass:: RPLCD.gpio.CharLCD
 
-Enums
-=====
+CharLCD (pigpio)
+================
 
-Alignment
----------
+The main class for controlling LCDs through pigpio_.
 
-This enum controls the text align mode of the LCD.
+.. autoclass:: RPLCD.pigpio.CharLCD
 
-.. autoclass:: RPLCD.common.Alignment
-
-ShiftMode
----------
-
-This enum controls the shift mode of the LCD.
-
-.. autoclass:: RPLCD.common.ShiftMode
-
-CursorMode
-----------
-
-The cursor can either be hidden, or shown as line or as blinking box.
-
-.. autoclass:: RPLCD.common.CursorMode
-
-BacklightMode
--------------
-
-A LCD backlight circuit can be configured in active high or active low mode.
-
-.. autoclass:: RPLCD.common.BacklightMode
+.. _pigpio: http://abyz.me.uk/rpi/pigpio/

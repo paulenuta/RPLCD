@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright (C) 2013-2017 Danilo Bargen
+Copyright (C) 2013-2018 Danilo Bargen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -24,8 +24,6 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import itertools
 import time
-
-from . import enum
 
 
 # # # BIT PATTERNS # # #
@@ -77,27 +75,22 @@ RS_INSTRUCTION = 0x00
 RS_DATA = 0x01
 
 
-# # # ENUMS # # #
+# # # Helper classes # # #
 
-class Alignment(enum.Enum):
+class Alignment(object):
     left = LCD_ENTRYLEFT
     right = LCD_ENTRYRIGHT
 
 
-class ShiftMode(enum.Enum):
+class ShiftMode(object):
     cursor = LCD_ENTRYSHIFTDECREMENT
     display = LCD_ENTRYSHIFTINCREMENT
 
 
-class CursorMode(enum.Enum):
+class CursorMode(object):
     hide = LCD_CURSOROFF | LCD_BLINKOFF
     line = LCD_CURSORON | LCD_BLINKOFF
     blink = LCD_CURSOROFF | LCD_BLINKON
-
-
-class BacklightMode(enum.Enum):
-    active_high = 1
-    active_low = 2
 
 
 # # # HELPER FUNCTIONS # # #

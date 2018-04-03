@@ -57,17 +57,6 @@ Alternatively, if you want to hide all characters but keep the data in the LCD
 memory, set the :attr:`~RPLCD.i2c.CharLCD.display_enabled` property to ``False``.
 
 
-Custom Wiring
-=============
-
-When using a LCD connected via GPIO pins, the wiring can be customized in the
-:class:`~RPLCD.gpio.CharLCD` constructor. These are the standard values:
-
-.. sourcecode:: python
-
-    lcd = CharLCD(pin_rs=15, pin_rw=18, pin_e=16, pins_data=[21, 22, 23, 24])
-
-
 Character Maps
 ==============
 
@@ -81,11 +70,11 @@ character map:
 
 .. sourcecode:: python
 
-    lcd = CharLCD(charmap='A00')
+    lcd = CharLCD(..., charmap='A00')
 
 As a rule of thumb, if your display can show Japanese characters, it uses
 ``A00``, otherwise ``A02``. To show the entire character map on your LCD, you
-can use the ``show_charmap.py`` script.
+can use the ``show_charmap`` target of the ``lcdtest.py`` script.
 
 Should you run into the situation that your character map does not seem to match
 either the ``A00`` or the ``A02`` tables, please `open an issue
@@ -113,7 +102,7 @@ pixel row. Each character is written to a specific location in CGRAM (numbers
 
 .. sourcecode:: python
 
-    >>> lcd = CharLCD()
+    >>> lcd = CharLCD(...)
     >>> smiley = (
     ...     0b00000,
     ...     0b01010,
@@ -149,13 +138,11 @@ Changing the Cursor Appearance
 
 The cursor appearance can be changed by setting the
 :attr:`~RPLCD.i2c.CharLCD.cursor_mode` property to one of the following three
-:class:`~RPLCD.common.CursorMode` values:
+values:
 
-- :attr:`~RPLCD.common.CursorMode.hide` – No cursor will be displayed
-- :attr:`~RPLCD.common.CursorMode.line` – The cursor will be indicated with an
-  underline
-- :attr:`~RPLCD.common.CursorMode.blink` – The cursor will be indicated with a
-  blinking square
+- ``hide`` – No cursor will be displayed
+- ``line`` – The cursor will be indicated with an underline
+- ``blink`` – The cursor will be indicated with a blinking square
 
 
 Backlight Control
@@ -179,10 +166,49 @@ using a transistor and a pull-up resistor. Then connect the transistor to a GPIO
 pin and configure that pin using the ``pin_backlight`` parameter in the
 constructor. If you use an active high circuit instead of active low, you can
 change that behavior by setting the  ``backlight_mode`` to either
-:attr:`BacklightMode.active_high <RPLCD.common.BacklightMode.active_high>` or
-:attr:`BacklightMode.active_low <RPLCD.common.BacklightMode.active_low>`. Now
-you can toggle the :attr:`~RPLCD.gpio.CharLCD.backlight_enabled` property to
-turn the backlight on and off.
+``active_high`` or ``active_low``. Now you can toggle the
+:attr:`~RPLCD.gpio.CharLCD.backlight_enabled` property to turn the backlight on
+and off.
+
+pigpio
+~~~~~~
+
+When using the ``pigpio`` library, it is also possible to control the backlight
+with PWM.
+
+The API is compatible to the backlight control of I²C and GPIO explained above,
+but the :attr:`~RPLCD.pigpio.CharLCD.backlight_enabled` property (and parameter)
+now also accepts a value between ``0`` and ``1`` as a backlight level (``0`` or
+``False`` turns the backlight off, ``1`` or ``True`` turns it on). The perceived
+brightness of the backlight should roughly correspond to the given value.
+
+The PWM dimming of the backlight has to be enabled explicitly by setting the
+``backlight_pwm`` parameter to ``True`` during initialization of
+:class:`~RPLCD.pigpio.CharLCD`. If this parameter is ``False`` (the default
+value), the interface only switches the backlight on and off. If this parameter
+is a number, dimming of the backlight is enabled and the value is interpreted
+as the PWM frequency in Hertz.
+
+
+Contrast Control
+================
+
+This is currently only possible with the pigpio backend.
+
+pigpio
+~~~~~~
+
+The API is similar to that controlling the backlight. The ``pin_contrast``
+specifies the pin connected to the LCDs contrast input. The ``contrast_mode``
+can be ``active_high`` or ``active_low`` and the ``contrast_pwm`` sets the PWM
+frequency.
+
+The :attr:`~RPLCD.pigpio.CharLCD.contrast` property sets the contrast level. It
+should be a value between ``0`` and ``1``. It is also recognized as a parameter
+to :class:`~RPLCD.pigpio.CharLCD` to set the initial contrast level.
+
+If you don't set the ``pin_contrast`` parameter, the contrast control stays
+disabled.
 
 
 Automatic Line Breaks

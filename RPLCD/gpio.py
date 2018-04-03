@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright (C) 2013-2017 Danilo Bargen
+Copyright (C) 2013-2018 Danilo Bargen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -35,10 +35,9 @@ PinConfig = namedtuple('PinConfig', 'rs rw e d0 d1 d2 d3 d4 d5 d6 d7 backlight m
 
 
 class CharLCD(BaseCharLCD):
-    def __init__(self, pin_rs=15, pin_rw=18, pin_e=16, pins_data=[21, 22, 23, 24],
-                       pin_backlight=None, backlight_mode=c.BacklightMode.active_low,
+    def __init__(self, numbering_mode=None, pin_rs=None, pin_rw=None, pin_e=None, pins_data=None,
+                       pin_backlight=None, backlight_mode='active_low',
                        backlight_enabled=True,
-                       numbering_mode=GPIO.BOARD,
                        cols=20, rows=4, dotsize=8,
                        charmap='A02',
                        auto_linebreaks=True):
@@ -63,10 +62,10 @@ class CharLCD(BaseCharLCD):
         :param pin_backlight: Pin for controlling backlight on/off. Set this to
             ``None`` for no backlight control. Default: ``None``.
         :type pin_backlight: int
-        :param backlight_mode: Set this to one of the BacklightMode enum values
+        :param backlight_mode: Set this to either ``active_high`` or ``active_low``
             to configure the operating control for the backlight. Has no effect if
             pin_backlight is ``None``
-        :type backlight_mode: BacklightMode
+        :type backlight_mode: str
         :param backlight_enabled: Whether the backlight is enabled initially.
             Default: ``True``. Has no effect if pin_backlight is ``None``
         :type backlight_enabled: bool
@@ -89,7 +88,18 @@ class CharLCD(BaseCharLCD):
 
         """
         # Set attributes
-        self.numbering_mode = numbering_mode
+        if numbering_mode == GPIO.BCM or numbering_mode == GPIO.BOARD:
+            self.numbering_mode = numbering_mode
+        else:
+            raise ValueError('Invalid GPIO numbering mode: numbering_mode=%s, '
+                             'must be either GPIO.BOARD or GPIO.BCM.\n'
+                             'See https://gist.github.com/dbrgn/77d984a822bfc9fddc844f67016d0f7e '
+                             'for more details.' % numbering_mode)
+        if pin_rs is None:
+            raise ValueError('pin_rs is not defined.')
+        if pin_e is None:
+            raise ValueError('pin_e is not defined.')
+
         if len(pins_data) == 4:  # 4 bit mode
             self.data_bus_mode = c.LCD_4BITMODE
             block1 = [None] * 4
@@ -131,7 +141,11 @@ class CharLCD(BaseCharLCD):
             GPIO.output(self.pins.rw, 0)
 
     def _close_connection(self):
-        GPIO.cleanup()
+        pins = (self.pins.rs, self.pins.rw, self.pins.e, self.pins.d0, self.pins.d1,
+                self.pins.d2, self.pins.d3, self.pins.d4, self.pins.d5, self.pins.d6,
+                self.pins.d7)
+        active_pins = [pin for pin in pins if pin is not None]
+        GPIO.cleanup(active_pins)
 
     # Properties
 
@@ -149,7 +163,7 @@ class CharLCD(BaseCharLCD):
             raise ValueError('backlight_enabled must be set to ``True`` or ``False``.')
         self._backlight_enabled = value
         GPIO.output(self.pins.backlight,
-                    value ^ (self.backlight_mode is c.BacklightMode.active_low))
+                    value ^ (self.backlight_mode == 'active_low'))
 
     backlight_enabled = property(_get_backlight_enabled, _set_backlight_enabled,
             doc='Whether or not to turn on the backlight.')
